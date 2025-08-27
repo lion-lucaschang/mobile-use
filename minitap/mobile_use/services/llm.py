@@ -4,7 +4,7 @@ from collections.abc import Awaitable, Callable
 from typing import overload
 
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, AzureChatOpenAI
 from minitap.mobile_use.config import (
     AgentNode,
     AgentNodeWithFallback,
@@ -42,6 +42,33 @@ def get_openai_llm(
         api_key=settings.OPENAI_API_KEY,
         base_url=settings.OPENAI_BASE_URL,
         temperature=temperature,
+    )
+    return client
+
+
+def get_azure_openai_llm(
+    model_name: str = "gpt-5",
+    temperature: float = 1,
+) -> AzureChatOpenAI:
+    # Use getattr with None as default to avoid attribute errors
+    azure_api_key = getattr(settings, 'AZURE_OPENAI_API_KEY', None)
+    azure_endpoint = getattr(settings, 'AZURE_OPENAI_ENDPOINT', None)
+    azure_api_version = getattr(settings, 'AZURE_OPENAI_API_VERSION', None)
+    
+    assert azure_api_key is not None, "AZURE_OPENAI_API_KEY is required"
+    assert azure_endpoint is not None, "AZURE_OPENAI_ENDPOINT is required"
+    assert azure_api_version is not None, "AZURE_OPENAI_API_VERSION is required"
+    
+    # Use deployment name if available, otherwise use model name
+    deployment_name = getattr(settings, 'AZURE_OPENAI_DEPLOYMENT_NAME', model_name)
+    
+    client = AzureChatOpenAI(
+        azure_deployment=deployment_name,
+        azure_endpoint=azure_endpoint,
+        api_key=azure_api_key,
+        api_version=azure_api_version,
+        temperature=temperature,
+        max_retries=2,
     )
     return client
 
@@ -116,6 +143,8 @@ def get_llm(
             raise ValueError("LLM has no fallback!")
     if llm.provider == "openai":
         return get_openai_llm(llm.model, temperature)
+    elif llm.provider == "azure_openai":
+        return get_azure_openai_llm(llm.model, temperature)
     elif llm.provider == "google":
         return get_google_llm(llm.model, temperature)
     elif llm.provider == "openrouter":
