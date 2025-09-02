@@ -49,19 +49,20 @@ def get_openai_llm(
 def get_azure_openai_llm(
     model_name: str = "gpt-5",
     temperature: float = 1,
+    suffix: str = "1"
 ) -> AzureChatOpenAI:
     # Use getattr with None as default to avoid attribute errors
-    azure_api_key = getattr(settings, 'AZURE_OPENAI_API_KEY', None)
-    azure_endpoint = getattr(settings, 'AZURE_OPENAI_ENDPOINT', None)
-    azure_api_version = getattr(settings, 'AZURE_OPENAI_API_VERSION', None)
-    
+    azure_api_key = getattr(settings, f'AZURE_OPENAI_API_KEY_{suffix}', None)
+    azure_endpoint = getattr(settings, f'AZURE_OPENAI_ENDPOINT_{suffix}', None)
+    azure_api_version = getattr(settings, f'AZURE_OPENAI_API_VERSION_{suffix}', None)
+
     assert azure_api_key is not None, "AZURE_OPENAI_API_KEY is required"
     assert azure_endpoint is not None, "AZURE_OPENAI_ENDPOINT is required"
     assert azure_api_version is not None, "AZURE_OPENAI_API_VERSION is required"
     
     # Use deployment name if available, otherwise use model name
-    deployment_name = getattr(settings, 'AZURE_OPENAI_DEPLOYMENT_NAME', model_name)
-    
+    deployment_name = getattr(settings, f'AZURE_OPENAI_DEPLOYMENT_NAME_{suffix}', model_name)
+
     client = AzureChatOpenAI(
         azure_deployment=deployment_name,
         azure_endpoint=azure_endpoint,
@@ -143,7 +144,9 @@ def get_llm(
             raise ValueError("LLM has no fallback!")
     if llm.provider == "openai":
         return get_openai_llm(llm.model, temperature)
-    elif llm.provider == "azure_openai":
+    elif llm.provider == "azure_openai_1":
+        return get_azure_openai_llm(llm.model, temperature)
+    elif llm.provider == "azure_openai_2":
         return get_azure_openai_llm(llm.model, temperature)
     elif llm.provider == "google":
         return get_google_llm(llm.model, temperature)

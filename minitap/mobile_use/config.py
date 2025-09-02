@@ -23,10 +23,15 @@ class Settings(BaseSettings):
     OPEN_ROUTER_API_KEY: SecretStr | None = None
     
     # Azure OpenAI Configuration
-    AZURE_OPENAI_API_KEY: SecretStr | None = None
-    AZURE_OPENAI_ENDPOINT: str | None = None
-    AZURE_OPENAI_API_VERSION: str | None = None
-    AZURE_OPENAI_DEPLOYMENT_NAME: str | None = None
+    AZURE_OPENAI_API_KEY_1: SecretStr | None = None
+    AZURE_OPENAI_ENDPOINT_1: str | None = None
+    AZURE_OPENAI_API_VERSION_1: str | None = None
+    AZURE_OPENAI_DEPLOYMENT_NAME_1: str | None = None
+
+    AZURE_OPENAI_API_KEY_2: SecretStr | None = None
+    AZURE_OPENAI_ENDPOINT_2: str | None = None
+    AZURE_OPENAI_API_VERSION_2: str | None = None
+    AZURE_OPENAI_DEPLOYMENT_NAME_2: str | None = None
 
     OPENAI_BASE_URL: str | None = None
 
@@ -94,7 +99,7 @@ def record_events(output_path: Path | None, events: list[str] | BaseModel | Any)
 
 ### LLM Configuration
 
-LLMProvider = Literal["openai", "azure_openai", "google", "openrouter", "xai"]
+LLMProvider = Literal["openai", "azure_openai_1", "azure_openai_2", "google", "openrouter", "xai"]
 LLMUtilsNode = Literal["outputter", "hopper"]
 AgentNode = Literal["planner", "orchestrator", "cortex", "executor"]
 AgentNodeWithFallback = Literal["cortex"]
@@ -113,13 +118,20 @@ class LLM(BaseModel):
             case "openai":
                 if not settings.OPENAI_API_KEY:
                     raise Exception(f"{name} requires OPENAI_API_KEY in .env")
-            case "azure_openai":
-                if not settings.AZURE_OPENAI_API_KEY:
-                    raise Exception(f"{name} requires AZURE_OPENAI_API_KEY in .env")
-                if not settings.AZURE_OPENAI_ENDPOINT:
-                    raise Exception(f"{name} requires AZURE_OPENAI_ENDPOINT in .env")
-                if not settings.AZURE_OPENAI_API_VERSION:
-                    raise Exception(f"{name} requires AZURE_OPENAI_API_VERSION in .env")
+            case "azure_openai_1":
+                if not settings.AZURE_OPENAI_API_KEY_1:
+                    raise Exception(f"{name} requires AZURE_OPENAI_API_KEY_1 in .env")
+                if not settings.AZURE_OPENAI_ENDPOINT_1:
+                    raise Exception(f"{name} requires AZURE_OPENAI_ENDPOINT_1 in .env")
+                if not settings.AZURE_OPENAI_API_VERSION_1:
+                    raise Exception(f"{name} requires AZURE_OPENAI_API_VERSION_1 in .env")
+            case "azure_openai_2":
+                if not settings.AZURE_OPENAI_API_KEY_2:
+                    raise Exception(f"{name} requires AZURE_OPENAI_API_KEY_2 in .env")
+                if not settings.AZURE_OPENAI_ENDPOINT_2:
+                    raise Exception(f"{name} requires AZURE_OPENAI_ENDPOINT_2 in .env")
+                if not settings.AZURE_OPENAI_API_VERSION_2:
+                    raise Exception(f"{name} requires AZURE_OPENAI_API_VERSION_2 in .env")
             case "google":
                 if not settings.GOOGLE_API_KEY:
                     raise Exception(f"{name} requires GOOGLE_API_KEY in .env")
